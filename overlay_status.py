@@ -29,8 +29,8 @@ class StatusOverlay:
         self.root.attributes('-alpha', 0.85)
         self.root.overrideredirect(True)
         
-        # 윈도우 크기를 290에서 310으로 증가
-        self.root.geometry('220x330+10+50')  # 높이를 330으로 수정
+        # 윈도우 크기를 더 크게 늘림
+        self.root.geometry('220x400+10+50')  # 높이를 350에서 400으로 수정
         
         # 메인 프레임 생성
         main_frame = ttk.Frame(self.root, padding="5")
@@ -60,7 +60,9 @@ class StatusOverlay:
         self.labels = {
             'skill1': ttk.Label(status_frame, text="F1: 비활성", style='Status.TLabel'),
             'skill2': ttk.Label(status_frame, text="F2: 비활성", style='Status.TLabel'),
-            'skill3': ttk.Label(status_frame, text="F3: 비활성", style='Status.TLabel'),
+            'skill6': ttk.Label(status_frame, text="F3: 비활성", style='Status.TLabel'),
+            'skill7': ttk.Label(status_frame, text="F4: 비활성", style='Status.TLabel'),
+            'skill3': ttk.Label(status_frame, text="F7: 비활성", style='Status.TLabel'),
             'skill4': ttk.Label(status_frame, text="F8: 비활성", style='Status.TLabel'),
             'skill4_party': ttk.Label(status_frame, text="파티버프(F8:Alt+P): 비활성", style='Status.TLabel'),
             'skill5': ttk.Label(status_frame, text="Alt+F1: 비활성", style='Status.TLabel'),
@@ -184,6 +186,8 @@ class StatusOverlay:
                                 'broom_ghost': '빗자루귀신',
                                 'egg_ghost': '달걀귀신',
                                 'fire_ghost': '불귀신',
+                                'scorpion': '전갈',
+                                'scorpion_chief': '전갈장',
                                 None: '검색중'
                             }.get(quest_type, '검색중')
                             

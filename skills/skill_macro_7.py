@@ -1,11 +1,10 @@
-# skills/skill_macro_2.py
 import time
 import win32api
 import win32con
 import keyboard
 from random_delay import add_delay
 
-class SkillMacro2Controller:
+class SkillMacro7Controller:
     def __init__(self):
         self.is_active = True
         self.is_running = False
@@ -13,10 +12,10 @@ class SkillMacro2Controller:
         
         # 키 설정
         self.ESC_KEY = win32con.VK_ESCAPE  # ESC키
-        self.SKILL_KEY = 0x32  # 2키
+        self.SKILL_KEY = 0x34  # 4키
         self.UP_KEY = win32con.VK_UP  # 위 방향키
         self.ENTER_KEY = win32con.VK_RETURN  # 엔터키
-        self.TOGGLE_KEY = 'F2'
+        self.TOGGLE_KEY = 'f4'  # F4로 설정
 
     def block_keys(self):
         try:
@@ -45,7 +44,7 @@ class SkillMacro2Controller:
         time.sleep(add_delay(0.005))
 
     def use_skill(self):
-        print("스킬 매크로 2 사용")
+        print("스킬 매크로 7 사용")
         
         if self.macro_controller:
             with self.macro_controller.key_input_lock:
@@ -54,11 +53,11 @@ class SkillMacro2Controller:
                     # 첫 번째 9>위>엔터
                     self.send_key(self.ESC_KEY)  # ESC  
                     time.sleep(0.03)
-                    self.send_key(self.SKILL_KEY)  # 2
+                    self.send_key(self.SKILL_KEY)  # 4
                     time.sleep(0.03)
                     self.send_key(self.UP_KEY)     # 위
                     time.sleep(0.03)
                     self.send_key(self.ENTER_KEY)  # 엔터
                     time.sleep(0.03)
                 finally:
-                    self.unblock_keys()
+                    self.unblock_keys() 

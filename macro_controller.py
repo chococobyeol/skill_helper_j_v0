@@ -77,8 +77,8 @@ class MacroController:
             self.heal_controller = None
 
         self.skill_controllers = {}
-        # 스킬 매크로 번호 리스트에 5 추가
-        skill_numbers = [1, 2, 3, 4, 5, 9]
+        # 스킬 매크로 번호 리스트에 7 추가
+        skill_numbers = [1, 2, 3, 4, 5, 6, 7, 9]  # 7 추가
         for num in skill_numbers:
             try:
                 module = __import__(f'skills.skill_macro_{num}', fromlist=[f'SkillMacro{num}Controller'])
@@ -100,9 +100,9 @@ class MacroController:
             self.quest_action = None
 
         self.quest_types = {
-            'beginner_ghost': False,
-            'ghost': False,
-            'highclass_ghost': False,
+            'beginner_ghost': True,
+            'ghost': True,
+            'highclass_ghost': True,
             'swift_skeleton': False,
             'skeleton': False,
             'insect': False,
@@ -110,7 +110,9 @@ class MacroController:
             'bachelor_ghost': False,
             'broom_ghost': False,
             'egg_ghost': False,
-            'fire_ghost': False
+            'fire_ghost': False,
+            'scorpion': True,
+            'scorpion_chief': True
         }
 
         self.setup_hotkeys()
@@ -136,11 +138,15 @@ class MacroController:
         self.HOTKEY_REFRESH_INTERVAL = 300  # 5분마다 핫키 갱신
 
     def setup_hotkeys(self):
-        # F1~F3, F8, F9 키 설정
-        for num in [1, 2, 3, 8, 9]:  # F4를 F8로 변경
-            if self.skill_controllers.get(num if num != 8 else 4):  # F8은 스킬매크로 4를 위한 것
+        # F1~F4, F7~F9 키 설정
+        for num in [1, 2, 3, 4, 7, 8, 9]:
+            if num in [7, 8]:  # F7은 스킬매크로 3, F8은 스킬매크로 4
                 keyboard.on_press_key(f'F{num}', 
-                    lambda e, n=num: self.toggle_skill_macro(4 if n == 8 else n) if not keyboard.is_pressed('alt') else (
+                    lambda e, n=num: self.toggle_skill_macro(3 if n == 7 else 4) if not keyboard.is_pressed('alt') else None
+                )
+            else:  # 나머지 키는 그대로 (F3->6, F4->7 매핑 포함)
+                keyboard.on_press_key(f'F{num}', 
+                    lambda e, n=num: self.toggle_skill_macro(6 if n == 3 else (7 if n == 4 else n)) if not keyboard.is_pressed('alt') else (
                         self.toggle_skill_macro(5) if n == 1 else None
                     )
                 )
@@ -239,9 +245,11 @@ class MacroController:
         priority_map = {
             1: 1,  # F1
             2: 3,  # F2
-            3: 2,  # F3
-            4: 4,  # F4
-            5: 2,  # 매크로5 (F3 같은 우선순위)
+            3: 2,  # F7
+            4: 4,  # F8
+            5: 4,  # 매크로5 (F3 같은 우선순위)
+            6: 3,  # F3
+            7: 3,  # F4
             9: 1   # F9
         }
         
@@ -251,7 +259,7 @@ class MacroController:
                 # 새로운 매크로가 더 높은 우선순위를 가질 경우
                 if priority_map[new_macro_num] > priority_map[num]:
                     self.skill_controllers[num].is_running = False
-                    if num in [1, 2, 3, 9]:  # F1, F2, F3, F9 매크로의 경우 ESC 키 전송
+                    if num in [1, 2, 3, 6, 7, 9]:  # ESC 키가 필요한 매크로들
                         with self.key_input_lock:
                             win32api.keybd_event(win32con.VK_ESCAPE, 0, 0, 0)
                             time.sleep(0.02)
@@ -283,10 +291,10 @@ class MacroController:
                 controller = self.skill_controllers[num]
 
                 if controller.is_running:
-                    if num == 4:  # F4 매크로 실행 시 특별 처리
+                    if num == 4:  # F8 매크로 실행 시 특별 처리
                         try:
                             with self.key_input_lock:
-                                print("[DEBUG] F4 매크로 실행 시작 (키 입력 잠금)")
+                                print("[DEBUG] F8 매크로 실행 시작 (키 입력 잠금)")
                                 self.f4_in_progress = True
                                 
                                 # 다른 매크로 중지
@@ -299,20 +307,19 @@ class MacroController:
                                             win32api.keybd_event(win32con.VK_ESCAPE, 0, win32con.KEYEVENTF_KEYUP, 0)
                                             time.sleep(0.02)
                                 
-                                # F4 스킬 실행
                                 controller.use_skill()
                                 
-                                # F4 매크로 실행 완료 후 정리
-                                controller.is_running = False  # 실행 완료 후 상태 변경
+                                # F8 매크로 실행 완료 후 정리
+                                controller.is_running = False
                                 if 4 in self.priority_queue:
                                     self.priority_queue.remove(4)
                                 
                                 # 이전 매크로들 재시작
                                 self.resume_previous_macro()
-                                print("[DEBUG] F4 매크로 실행 완료 (키 입력 잠금 해제)")
+                                print("[DEBUG] F8 매크로 실행 완료 (키 입력 잠금 해제)")
                         finally:
                             self.f4_in_progress = False
-                            print("[DEBUG] F4 매크로 실행 완료 (키 입력 잠금 해제)")
+                            print("[DEBUG] F8 매크로 실행 완료 (키 입력 잠금 해제)")
                     elif num == 5:  # alt+f1 매크로 실행 시 특별 처리
                         try:
                             if not self.macro5_executing:
@@ -356,8 +363,9 @@ class MacroController:
                             self.force_release_alt_keys()
 
                         time.sleep(0.1)  # 다음 실행까지 약간의 딜레이
-                    else:
-                        if not self.f4_in_progress:  # F4가 실행 중이 아닐 때만 다른 매크로 실행
+                    else:  # 다른 매크로들은 기존대로 실행
+                        if not self.f4_in_progress:  # F8이 실행 중이 아닐 때만 실행
+                            print(f"스킬 매크로 {num} 실행")  # 디버그용
                             controller.use_skill()
 
                 time.sleep(0.01)
@@ -372,7 +380,7 @@ class MacroController:
         active_macros = {}
         
         # 스킬 매크로 상태 저장
-        for num in [1, 2, 3, 4, 5, 9]:
+        for num in [1, 2, 3, 4, 5, 6, 7, 9]:  # 7 추가
             if self.skill_controllers.get(num):
                 active_macros[num] = self.skill_controllers[num].is_running
                 self.skill_controllers[num].is_running = False
@@ -399,7 +407,7 @@ class MacroController:
                 self.heal_controller.heal_area = heal_area
                 self.heal_controller.mana_controller.mana_area = mana_area
             
-            for num in [1, 2, 3, 4, 5, 9]:
+            for num in [1, 2, 3, 4, 5, 6, 7, 9]:  # 7 추가
                 if self.skill_controllers.get(num):
                     self.skill_controllers[num].skill_area = skill_area
             
@@ -471,7 +479,7 @@ class MacroController:
             self.heal_controller.mana_controller.is_running = False
         
         # 모든 스킬 매크로 중지
-        for num in [1, 2, 3, 4, 5, 9]:
+        for num in [1, 2, 3, 4, 5, 6, 9]:
             if self.skill_controllers.get(num):
                 self.skill_controllers[num].is_running = False
         
@@ -497,7 +505,7 @@ def main():
         controller.threads.append(heal_thread)
         heal_thread.start()
 
-    for num in [1, 2, 3, 4, 5, 9]:
+    for num in [1, 2, 3, 4, 5, 6, 7, 9]:  # 7 추가
         if controller.skill_controllers.get(num):
             skill_thread = Thread(target=controller.run_skill_macro, args=(num,))
             skill_thread.daemon = True

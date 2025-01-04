@@ -19,6 +19,8 @@ class SkillMacro3Controller:
         self.key_delay = 0.1
         self.five_delay = 0.1
 
+        self.TOGGLE_KEY = 'f7'
+
     def send_key(self, key, delay=None):
         if delay is None:
             delay = self.key_delay
