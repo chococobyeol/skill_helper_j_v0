@@ -61,9 +61,9 @@ class StatusOverlay:
             'skill1': ttk.Label(status_frame, text="F1: 비활성", style='Status.TLabel'),
             'skill2': ttk.Label(status_frame, text="F2: 비활성", style='Status.TLabel'),
             'skill3': ttk.Label(status_frame, text="F3: 비활성", style='Status.TLabel'),
-            'skill4': ttk.Label(status_frame, text="F4: 비활성", style='Status.TLabel'),
-            'skill4_party': ttk.Label(status_frame, text="파티버프(F4:a+P): 비활성", style='Status.TLabel'),
-            'skill5': ttk.Label(status_frame, text="a+F1: 비활성", style='Status.TLabel'),
+            'skill4': ttk.Label(status_frame, text="F8: 비활성", style='Status.TLabel'),
+            'skill4_party': ttk.Label(status_frame, text="파티버프(F8:Alt+P): 비활성", style='Status.TLabel'),
+            'skill5': ttk.Label(status_frame, text="Alt+F1: 비활성", style='Status.TLabel'),
             'skill9': ttk.Label(status_frame, text="자동(F9): 비활성", style='Status.TLabel'),
             'heal': ttk.Label(status_frame, text="체력(`): 비활성", style='Status.TLabel'),
             'mana': ttk.Label(status_frame, text="마력(a+[): 비활성", style='Status.TLabel'),
@@ -139,7 +139,7 @@ class StatusOverlay:
                                       self.macro_controller.skill_controllers[4] and 
                                       self.macro_controller.skill_controllers[4].use_party_skill)
                             status = "활성" if is_active else "비활성"
-                            label.config(text=f"파티버프(F4:a+P): {status}", 
+                            label.config(text=f"파티버프(F8:Alt+P): {status}", 
                                        foreground='#007ACC' if is_active else 'black')
                         else:  # 일반 스킬 매크로 처리
                             skill_number = int(key[-1])

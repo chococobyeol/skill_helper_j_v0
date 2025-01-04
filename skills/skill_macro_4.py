@@ -20,7 +20,7 @@ class SkillMacro4Controller:
         self.ENTER_KEY = win32con.VK_RETURN
         self.TAB_KEY = win32con.VK_TAB
         self.SHIFT_KEY = win32con.VK_SHIFT
-        self.TOGGLE_KEY = 'F4'
+        self.TOGGLE_KEY = 'f8'
 
         self.macro_controller = None
 

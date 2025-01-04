@@ -136,11 +136,11 @@ class MacroController:
         self.HOTKEY_REFRESH_INTERVAL = 300  # 5분마다 핫키 갱신
 
     def setup_hotkeys(self):
-        # F1~F4, F9 키 설정
-        for num in [1, 2, 3, 4, 9]:
-            if self.skill_controllers.get(num):
+        # F1~F3, F8, F9 키 설정
+        for num in [1, 2, 3, 8, 9]:  # F4를 F8로 변경
+            if self.skill_controllers.get(num if num != 8 else 4):  # F8은 스킬매크로 4를 위한 것
                 keyboard.on_press_key(f'F{num}', 
-                    lambda e, n=num: self.toggle_skill_macro(n) if not keyboard.is_pressed('alt') else (
+                    lambda e, n=num: self.toggle_skill_macro(4 if n == 8 else n) if not keyboard.is_pressed('alt') else (
                         self.toggle_skill_macro(5) if n == 1 else None
                     )
                 )
