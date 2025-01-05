@@ -207,7 +207,7 @@ class ManaRecoveryController:
                             print("마나가 너무 부족합니다! 물약 사용")
                             self.use_mana_potion()
                             time.sleep(0.03)
-                        elif current_mana <= 600:  # 마나가 부족할 때
+                        elif current_mana <= 800:  # 마나가 부족할 때
                             self.is_recovering = True
                             print(f"현재 마나: {current_mana}")  # 마나가 부족할 때만 출력
                             self.try_mana_recovery()

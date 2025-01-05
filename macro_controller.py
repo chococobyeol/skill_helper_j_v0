@@ -100,19 +100,19 @@ class MacroController:
             self.quest_action = None
 
         self.quest_types = {
-            'beginner_ghost': True,
-            'ghost': True,
+            'beginner_ghost': False,
+            'ghost': False,
             'highclass_ghost': True,
-            'swift_skeleton': False,
-            'skeleton': False,
-            'insect': False,
+            'swift_skeleton': True,
+            'skeleton': True,
+            'insect': True,
             'virgin_ghost': True,
             'bachelor_ghost': False,
             'broom_ghost': False,
             'egg_ghost': False,
             'fire_ghost': False,
-            'scorpion': True,
-            'scorpion_chief': True
+            'scorpion': False,
+            'scorpion_chief': False
         }
 
         self.setup_hotkeys()

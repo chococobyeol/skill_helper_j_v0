@@ -59,7 +59,7 @@ class HealingController:
             print("CPU 모드로 대체합니다.")
             self.reader = easyocr.Reader(['en'], gpu=False)
         
-        self.health_threshold = 1500
+        self.health_threshold = 1880
 
     def check_image_files(self):
         if not os.path.exists(self.lack_health_path):
@@ -116,13 +116,13 @@ class HealingController:
             if health is not None:
                 if health <= self.health_threshold:
                     print(f"현재 체력: {health}")
-                return health <= self.health_threshold
-            return False
+                return health, health <= self.health_threshold
+            return None, False
         except Exception as e:
             print(f"체력 확인 중 오류: {str(e)}")
-            return False
+            return None, False
 
-    def use_heal_skill(self):
+    def use_heal_skill(self, health):
         if self.macro_controller:
             self.macro_controller.is_using_skill = False
             self.macro_controller.current_skill = None
@@ -131,9 +131,24 @@ class HealingController:
         # 글로벌 락 획득
         with self.macro_controller.key_input_lock:
             self.send_key(self.ESC_KEY, 0.025)
-            self.send_key(self.HEAL_KEY, 0.02)
+            # 체력 값에 따라 힐링 횟수 조절
+            heal_amount = 500
+            print("첫번째 힐링")
+            self.send_key(self.HEAL_KEY, 0.01)
             self.send_key(self.HOME_KEY, 0.02)
             self.send_key(self.ENTER_KEY, 0.03)
+            if self.health_threshold-health > heal_amount:
+                print("두번째 힐링")
+                self.send_key(self.HEAL_KEY, 0.01)
+                self.send_key(self.ENTER_KEY, 0.03)
+            if self.health_threshold-health > heal_amount * 2:
+                print("세번째 힐링")
+                self.send_key(self.HEAL_KEY, 0.01)
+                self.send_key(self.ENTER_KEY, 0.03)
+            if self.health_threshold-health > heal_amount * 3:
+                print("네번째 힐링")
+                self.send_key(self.HEAL_KEY, 0.01)
+                self.send_key(self.ENTER_KEY, 0.03)
 
     def check_and_heal(self):
         mana_thread = Thread(target=self.mana_controller.check_and_recover_mana)
@@ -147,10 +162,11 @@ class HealingController:
                         time.sleep(0.01)
                         continue
 
-                    if self.find_image(self.lack_health_path):
+                    health, needs_healing = self.find_image(self.lack_health_path)
+                    if needs_healing and health is not None:
                         self.is_healing = True
                         print("체력 부족: 힐링 스킬 시도")
-                        self.use_heal_skill()
+                        self.use_heal_skill(health)
                         time.sleep(0.03)
                     else:
                         self.is_healing = False
