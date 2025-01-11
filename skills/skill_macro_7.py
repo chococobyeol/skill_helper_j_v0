@@ -52,20 +52,12 @@ class SkillMacro7Controller:
                 try:
                     # 첫 번째 4>위>엔터
                     self.send_key(self.ESC_KEY)  # ESC  
-                    time.sleep(0.03)
+                    time.sleep(0.025)
                     self.send_key(self.SKILL_KEY)  # 4
-                    time.sleep(0.03)
+                    time.sleep(0.025)
                     self.send_key(self.UP_KEY)     # 위
-                    time.sleep(0.03)
+                    time.sleep(0.025)
                     self.send_key(self.ENTER_KEY)  # 엔터
-                    time.sleep(0.03)
-                    self.send_key(self.SKILL_KEY)  # 4
-                    time.sleep(0.03)
-                    self.send_key(self.ENTER_KEY)  # 엔터
-                    time.sleep(0.03)
-                    self.send_key(self.SKILL_KEY)  # 4
-                    time.sleep(0.03)
-                    self.send_key(self.ENTER_KEY)  # 엔터
-                    time.sleep(0.03)
+                    time.sleep(0.025)
                 finally:
                     self.unblock_keys() 

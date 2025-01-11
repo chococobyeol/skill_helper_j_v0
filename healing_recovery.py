@@ -13,6 +13,7 @@ import easyocr
 import torch
 import re
 from random_delay import add_delay
+import threading
 
 class HealingController:
     def __init__(self):
@@ -59,7 +60,10 @@ class HealingController:
             print("CPU 모드로 대체합니다.")
             self.reader = easyocr.Reader(['en'], gpu=False)
         
-        self.health_threshold = 1880
+        self.health_threshold = 3241
+        
+        self.macro_controller = None
+        self.key_input_lock = threading.Lock()
 
     def check_image_files(self):
         if not os.path.exists(self.lack_health_path):
@@ -122,33 +126,56 @@ class HealingController:
             print(f"체력 확인 중 오류: {str(e)}")
             return None, False
 
+    def set_macro_controller(self, controller):
+        self.macro_controller = controller
+
     def use_heal_skill(self, health):
+        if self.macro_controller:
+            self.macro_controller.stop_all_inputs()
+            self.macro_controller.is_using_skill = True
+            self.macro_controller.current_skill = "healing"
+
+        print("힐링 스킬 시도 (우선)")
+        
+        with self.key_input_lock:
+            if self.macro_controller:
+                with self.macro_controller.key_input_lock:
+                    self._perform_healing(health)
+            else:
+                self._perform_healing(health)
+
         if self.macro_controller:
             self.macro_controller.is_using_skill = False
             self.macro_controller.current_skill = None
+            self.macro_controller.resume_inputs()
 
-        print("힐링 스킬 시도 (우선)")
-        # 글로벌 락 획득
-        with self.macro_controller.key_input_lock:
-            self.send_key(self.ESC_KEY, 0.025)
-            # 체력 값에 따라 힐링 횟수 조절
-            heal_amount = 500
-            print("첫번째 힐링")
+    def _perform_healing(self, health):
+        self.send_key(self.ESC_KEY, 0.02)
+        heal_amount = 500
+        print("첫번째 힐링")
+        self.send_key(self.HEAL_KEY, 0.01)
+        self.send_key(self.HOME_KEY, 0.02)
+        self.send_key(self.ENTER_KEY, 0.03)
+        if self.health_threshold-health > heal_amount:
+            print("두번째 힐링")
             self.send_key(self.HEAL_KEY, 0.01)
             self.send_key(self.HOME_KEY, 0.02)
             self.send_key(self.ENTER_KEY, 0.03)
-            if self.health_threshold-health > heal_amount:
-                print("두번째 힐링")
-                self.send_key(self.HEAL_KEY, 0.01)
-                self.send_key(self.ENTER_KEY, 0.03)
-            if self.health_threshold-health > heal_amount * 2:
-                print("세번째 힐링")
-                self.send_key(self.HEAL_KEY, 0.01)
-                self.send_key(self.ENTER_KEY, 0.03)
-            if self.health_threshold-health > heal_amount * 3:
-                print("네번째 힐링")
-                self.send_key(self.HEAL_KEY, 0.01)
-                self.send_key(self.ENTER_KEY, 0.03)
+        if self.health_threshold-health > heal_amount * 2:
+            print("세번째 힐링")
+            self.send_key(self.HEAL_KEY, 0.01)
+            self.send_key(self.HOME_KEY, 0.02)
+            self.send_key(self.ENTER_KEY, 0.03)
+        if self.health_threshold-health > heal_amount * 3:
+            print("네번째 힐링")
+            self.send_key(self.HEAL_KEY, 0.01)
+            self.send_key(self.HOME_KEY, 0.02)
+            self.send_key(self.ENTER_KEY, 0.03)
+        if self.health_threshold-health > heal_amount * 4:
+            print("다섯번째 힐링")
+            self.send_key(self.HEAL_KEY, 0.01)
+            self.send_key(self.HOME_KEY, 0.02)
+            self.send_key(self.ENTER_KEY, 0.03)
 
     def check_and_heal(self):
         mana_thread = Thread(target=self.mana_controller.check_and_recover_mana)
