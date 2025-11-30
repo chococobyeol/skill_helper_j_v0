@@ -138,17 +138,36 @@ class MacroController:
         self.HOTKEY_REFRESH_INTERVAL = 300  # 5분마다 핫키 갱신
 
     def setup_hotkeys(self):
-        # F1~F4, F7~F9 키 설정
-        for num in [1, 2, 3, 4, 7, 8, 9]:
+        # F1~F3, F7~F9, F13 키 설정
+        # F13 -> 스킬 매크로 1 (기존 F1)
+        keyboard.on_press_key('f13', 
+            lambda e: self.toggle_skill_macro(1) if not keyboard.is_pressed('alt') else self.toggle_skill_macro(5)
+        )
+        
+        # F1 -> 스킬 매크로 6 (기존 F2)
+        keyboard.on_press_key('f1', 
+            lambda e: self.toggle_skill_macro(6) if not keyboard.is_pressed('alt') else None
+        )
+        
+        # F2 -> 스킬 매크로 7 (기존 F3)
+        keyboard.on_press_key('f2', 
+            lambda e: self.toggle_skill_macro(7) if not keyboard.is_pressed('alt') else None
+        )
+        
+        # F3 -> 스킬 매크로 2 (기존 F1)
+        keyboard.on_press_key('f3', 
+            lambda e: self.toggle_skill_macro(2) if not keyboard.is_pressed('alt') else None
+        )
+        
+        # F7, F8, F9 키 설정
+        for num in [7, 8, 9]:
             if num in [7, 8]:  # F7은 스킬매크로 3, F8은 스킬매크로 4
-                keyboard.on_press_key(f'F{num}', 
+                keyboard.on_press_key(f'f{num}', 
                     lambda e, n=num: self.toggle_skill_macro(3 if n == 7 else 4) if not keyboard.is_pressed('alt') else None
                 )
-            else:  # 나머지 키는 그대로 (F3->6, F4->7 매핑 포함)
-                keyboard.on_press_key(f'F{num}', 
-                    lambda e, n=num: self.toggle_skill_macro(6 if n == 3 else (7 if n == 4 else n)) if not keyboard.is_pressed('alt') else (
-                        self.toggle_skill_macro(5) if n == 1 else None
-                    )
+            else:  # F9는 스킬 매크로 9
+                keyboard.on_press_key(f'f{num}', 
+                    lambda e, n=num: self.toggle_skill_macro(9) if not keyboard.is_pressed('alt') else None
                 )
         
         # 다른 키들도 이벤트 핸들러로 처리
@@ -193,7 +212,7 @@ class MacroController:
                 print(f"\n매크로 5 실행 중 - F{num} 매크로 토글 무시됨")
                 return
             
-            # alt+f1 (매크로 5) 관련 특별 처리
+            # Alt+F13 (매크로 5) 관련 특별 처리
             if num == 5:
                 # 실행 중인 경우 무시
                 if self.macro5_executing:
@@ -243,13 +262,13 @@ class MacroController:
     def handle_priority(self, new_macro_num):
         # 우선순위 맵 (숫자가 클수록 높은 우선순위)
         priority_map = {
-            1: 1,  # F1
-            2: 3,  # F2
+            1: 1,  # F13
+            2: 3,  # F3
             3: 2,  # F7
             4: 4,  # F8
-            5: 4,  # 매크로5 (F3 같은 우선순위)
-            6: 3,  # F3
-            7: 3,  # F4
+            5: 4,  # Alt+F13
+            6: 3,  # F1
+            7: 3,  # F2
             9: 1   # F9
         }
         
@@ -320,14 +339,14 @@ class MacroController:
                         finally:
                             self.f4_in_progress = False
                             print("[DEBUG] F8 매크로 실행 완료 (키 입력 잠금 해제)")
-                    elif num == 5:  # alt+f1 매크로 실행 시 특별 처리
+                    elif num == 5:  # Alt+F13 매크로 실행 시 특별 처리
                         try:
                             if not self.macro5_executing:
                                 time.sleep(0.01)  # CPU 사용률 감소를 위한 짧은 대기
                                 continue
                                 
                             with self.key_input_lock:
-                                print("[DEBUG] alt+f1 매크로 실행 시작 (키 입력 잠금)")
+                                print("[DEBUG] Alt+F13 매크로 실행 시작 (키 입력 잠금)")
                                 
                                 # 다른 매크로 중지
                                 for other_num in self.priority_queue[:]:
@@ -339,7 +358,7 @@ class MacroController:
                                             win32api.keybd_event(win32con.VK_ESCAPE, 0, win32con.KEYEVENTF_KEYUP, 0)
                                             time.sleep(0.02)
                                 
-                                # alt+f1 스킬 실행
+                                # Alt+F13 스킬 실행
                                 controller.use_skill()
                                 
                                 # 실행 완료 후 정리
@@ -352,13 +371,13 @@ class MacroController:
                                 
                                 # 이전 매크로들 재시작
                                 self.resume_previous_macro()
-                                print("[DEBUG] alt+f1 매크로 실행 완료 (키 입력 잠금 해제)")
+                                print("[DEBUG] Alt+F13 매크로 실행 완료 (키 입력 잠금 해제)")
                                 
                                 # 실행 완료 표시
                                 self.macro5_executing = False
                                 
                         except Exception as e:
-                            print(f"[ERROR] alt+f1 매크로 실행 중 오류: {e}")
+                            print(f"[ERROR] Alt+F13 매크로 실행 중 오류: {e}")
                             self.macro5_executing = False
                             self.force_release_alt_keys()
 
@@ -520,8 +539,14 @@ def main():
             skill_thread.start()
     
     print("\n=== 매크로 시작 ===")
-    print("F8: 힐링 매크로 시작/정지")
-    print("F1~F4, F9: 스킬 매크로 시작/정지")
+    print("`: 힐링 매크로 시작/정지")
+    print("F13: 스킬 매크로 1 시작/정지 (Alt+F13: 스킬 매크로 5)")
+    print("F1: 스킬 매크로 6 시작/정지")
+    print("F2: 스킬 매크로 7 시작/정지")
+    print("F3: 스킬 매크로 2 시작/정지")
+    print("F7: 스킬 매크로 3 시작/정지")
+    print("F8: 스킬 매크로 4 시작/정지")
+    print("F9: 스킬 매크로 9 시작/정지")
     print("Alt+O: 퀘스트 매크로 시작/정지")
     print("Alt+[: 체력/마나 회복 시작/정지")
     print("Alt+\\: 영역 선택")

@@ -56,26 +56,28 @@ class StatusOverlay:
         separator = ttk.Separator(status_frame, orient='horizontal')
         separator.pack(fill='x', pady=3)
         
-        # 상태 표시 레이블들
+        # 상태 표시 레이블들 (F1, F2, F3 순서로)
         self.labels = {
-            'skill1': ttk.Label(status_frame, text="F1: 비활성", style='Status.TLabel'),
-            'skill2': ttk.Label(status_frame, text="F2: 비활성", style='Status.TLabel'),
-            'skill6': ttk.Label(status_frame, text="F3: 비활성", style='Status.TLabel'),
-            'skill7': ttk.Label(status_frame, text="F4: 비활성", style='Status.TLabel'),
+            'skill6': ttk.Label(status_frame, text="F1: 비활성", style='Status.TLabel'),
+            'skill7': ttk.Label(status_frame, text="F2: 비활성", style='Status.TLabel'),
+            'skill2': ttk.Label(status_frame, text="F3: 비활성", style='Status.TLabel'),
             'skill3': ttk.Label(status_frame, text="F7: 비활성", style='Status.TLabel'),
             'skill4': ttk.Label(status_frame, text="F8: 비활성", style='Status.TLabel'),
             'skill4_party': ttk.Label(status_frame, text="파티버프(F8:Alt+P): 비활성", style='Status.TLabel'),
-            'skill5': ttk.Label(status_frame, text="Alt+F1: 비활성", style='Status.TLabel'),
             'skill9': ttk.Label(status_frame, text="자동(F9): 비활성", style='Status.TLabel'),
+            'skill1': ttk.Label(status_frame, text="F13: 비활성", style='Status.TLabel'),
+            'skill5': ttk.Label(status_frame, text="Alt+F13: 비활성", style='Status.TLabel'),
             'heal': ttk.Label(status_frame, text="체력(`): 비활성", style='Status.TLabel'),
             'mana': ttk.Label(status_frame, text="마력(a+[): 비활성", style='Status.TLabel'),
             'quest': ttk.Label(status_frame, text="퀘스트(a+O): 비활성", style='Status.TLabel'),
             'quest_status': ttk.Label(status_frame, text="", style='Status.TLabel', foreground='gray'),
         }
         
-        # 레이블 배치
-        for label in self.labels.values():
-            label.pack(anchor='w', padx=10, pady=pady_value)
+        # 레이블 배치 (순서대로)
+        label_order = ['skill6', 'skill7', 'skill2', 'skill3', 'skill4', 'skill4_party', 'skill9', 'skill1', 'skill5', 'heal', 'mana', 'quest', 'quest_status']
+        for key in label_order:
+            if key in self.labels:
+                self.labels[key].pack(anchor='w', padx=10, pady=pady_value)
         
         # 하단 프레임 (종료 안내용)
         bottom_frame = ttk.Frame(main_frame)
