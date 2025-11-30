@@ -23,6 +23,9 @@ class AreaSelector(QWidget):
         
         # 영역 선택 모드
         self.selecting_mode = None  # 'skill' 또는 'heal'
+        
+        # 저장된 절대 영역 (창이 닫힌 후에도 접근 가능)
+        self.saved_absolute_areas = None
     
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -82,11 +85,16 @@ class AreaSelector(QWidget):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:  # Enter 키
             print("영역 설정 완료")
+            # 창이 닫히기 전에 절대 영역 저장
+            self.saved_absolute_areas = self.get_absolute_areas()
+            print(f"저장된 영역: {self.saved_absolute_areas}")
             self.close()
         elif event.key() == Qt.Key_Escape:  # ESC 키
             print("영역 설정 취소")
             self.skill_area = None
             self.heal_area = None
+            self.mana_area = None
+            self.saved_absolute_areas = None
             self.close()
     
     def get_absolute_areas(self):
@@ -94,19 +102,20 @@ class AreaSelector(QWidget):
             return None, None, None
             
         window_pos = self.pos()
-        skill_abs = QRect(
+        # QRect를 튜플로 변환하여 반환 (일부 코드에서 튜플 형식을 기대함)
+        skill_abs = (
             window_pos.x() + self.skill_area.x(),
             window_pos.y() + self.skill_area.y(),
             self.skill_area.width(),
             self.skill_area.height()
         )
-        heal_abs = QRect(
+        heal_abs = (
             window_pos.x() + self.heal_area.x(),
             window_pos.y() + self.heal_area.y(),
             self.heal_area.width(),
             self.heal_area.height()
         )
-        mana_abs = QRect(
+        mana_abs = (
             window_pos.x() + self.mana_area.x(),
             window_pos.y() + self.mana_area.y(),
             self.mana_area.width(),
@@ -119,7 +128,11 @@ def show_area_selector():
     selector = AreaSelector()
     selector.show()
     app.exec_()
-    return selector.get_absolute_areas()
+    # 저장된 절대 영역 반환 (창이 닫힌 후에도 접근 가능)
+    if selector.saved_absolute_areas:
+        return selector.saved_absolute_areas
+    else:
+        return None, None, None
 
 if __name__ == "__main__":
     keyboard.add_hotkey('shift+\\', show_area_selector)

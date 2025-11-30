@@ -34,6 +34,7 @@ class ManaRecoveryController:
         self.CTRL_KEY = win32con.VK_CONTROL  # Ctrl 키
         self.TOGGLE_KEY = 'F9'
         self.EXIT_KEY = 'ctrl+q'
+        self.ESC_KEY = win32con.VK_ESCAPE
         
         self.is_using_skill = False  # 스킬 사용 중 플래그 추가
         
@@ -165,8 +166,17 @@ class ManaRecoveryController:
                 # 체력바 바로 아래 위치 (체력바와 같은 크기)
                 region = (1285, 933, 314, 33)  # y값을 900 + 33 = 933으로 설정
             else:
-                region = (self.mana_area.x(), self.mana_area.y(), 
-                         self.mana_area.width(), self.mana_area.height())
+                # QRect 또는 튜플 형식 모두 지원
+                if isinstance(self.mana_area, tuple):
+                    region = self.mana_area
+                else:
+                    region = (self.mana_area.x(), self.mana_area.y(), 
+                             self.mana_area.width(), self.mana_area.height())
+            
+            # 디버깅: 영역이 실제로 업데이트되었는지 확인
+            if hasattr(self, '_last_mana_region') and self._last_mana_region != region:
+                print(f"[DEBUG] 마나 영역 변경: {self._last_mana_region} -> {region}")
+            self._last_mana_region = region
             
             screen = pyautogui.screenshot(region=region)
             screen_np = np.array(screen)
@@ -180,10 +190,12 @@ class ManaRecoveryController:
         self.is_using_skill = True  # 스킬 사용 시작
         print("마나 물약 사용")
         # U 키만 누르고 떼기
+        self.send_key(self.ESC_KEY)
+        time.sleep(0.025)
         self.send_key(self.MANA_POTION_KEY)
-        time.sleep(0.02)
+        time.sleep(0.04)
         self.send_key(self.MANA_POTION_KEY)
-        time.sleep(0.02)
+        time.sleep(0.04)
         self.is_using_skill = False  # 스킬 사용 완료
 
     def try_mana_recovery(self):
@@ -201,17 +213,17 @@ class ManaRecoveryController:
                     current_mana = self.check_mana()
                     
                     if current_mana is not None:
-                        if current_mana <= 30:  # 마나가 매우 부족할 때
+                        if current_mana < 30:  # 마나가 매우 부족할 때
                             self.is_recovering = True
                             print(f"현재 마나: {current_mana}")  # 마나가 매우 부족할 때만 출력
                             print("마나가 너무 부족합니다! 물약 사용")
                             self.use_mana_potion()
-                            time.sleep(0.03)
+                            time.sleep(0.02)
                         elif current_mana <= 800:  # 마나가 부족할 때
                             self.is_recovering = True
                             print(f"현재 마나: {current_mana}")  # 마나가 부족할 때만 출력
                             self.try_mana_recovery()
-                            time.sleep(0.03)
+                            time.sleep(0.02)
                         else:
                             self.is_recovering = False
 

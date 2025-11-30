@@ -397,6 +397,8 @@ class MacroController:
         # 영역 선택 실행
         skill_area, heal_area, mana_area = show_area_selector()
         
+        print(f"[DEBUG] 영역 선택 반환값: skill_area={skill_area}, heal_area={heal_area}, mana_area={mana_area}")
+        
         if skill_area and heal_area and mana_area:
             print(f"스킬/마나 감지 영역: {skill_area}")
             print(f"힐 감지 영역: {heal_area}")
@@ -406,12 +408,17 @@ class MacroController:
             if self.heal_controller:
                 self.heal_controller.heal_area = heal_area
                 self.heal_controller.mana_controller.mana_area = mana_area
+                print(f"[DEBUG] 힐 영역 업데이트: {self.heal_controller.heal_area}")
+                print(f"[DEBUG] 마나 영역 업데이트: {self.heal_controller.mana_controller.mana_area}")
             
             for num in [1, 2, 3, 4, 5, 6, 7, 9]:  # 7 추가
                 if self.skill_controllers.get(num):
                     self.skill_controllers[num].skill_area = skill_area
+                    print(f"[DEBUG] 스킬 매크로 {num} 영역 업데이트: {self.skill_controllers[num].skill_area}")
             
             print("모든 매크로의 감지 영역이 업데이트되었습니다.")
+        else:
+            print("[DEBUG] 영역 선택이 취소되었거나 유효하지 않습니다.")
         
         # 이전 상태 복원
         for num, was_active in active_macros.items():
